@@ -1,7 +1,9 @@
-ScriptName PlayerZombieQuestScript extends Quest
+ScriptName PlayerZombieQuestScript extends Quest Conditional
 
 Bool Property PlayerIsZombie Auto
 
+Message Property ZombieRisen Auto
+Message Property ZombieCured Auto
 Message Property ZombieFeedMessageStage1 Auto
 Message Property ZombieFeedMessageStage3 Auto
 Message Property ZombieStage1Message Auto
@@ -143,13 +145,16 @@ Function zombifyPlayer()
 		Self.ZombieStageTime = Self.GameDaysPassed.getValue()
 		Self.setStageStats(1)
 		Self.RegisterForUpdateGameTime(3)
+		Self.ZombieRisen.Show()
 	EndIf
 EndFunction
 
 Function curePlayer()
 	If(PlayerIsZombie)
 		Self.ClearStageStats()
+		Game.getPlayer().SetAttackActorOnSight(false)
 		Self.UnregisterForUpdateGameTime()
+		Self.ZombieCured.show()
 	EndIf
 EndFunction
 
