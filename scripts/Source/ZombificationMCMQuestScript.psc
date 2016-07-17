@@ -62,7 +62,7 @@ Int Function GetStatOptionIndex(int option)
 	int i = 0
 	while (i < _controlIds.length) 
 		if (_controlIds[i] == option)
-			return _controlIds[i]
+			return i
 		EndIf
 		i += 1
 	EndWhile
@@ -90,7 +90,7 @@ EndEvent
 Event OnOptionSliderAccept(int option, float value)
 	If (option == _stageTimeControlId)
 		Self.PlayerZombieQuest.ZombieDaysBetweenStages = value / 24.0
-	Else
+	Else		
 		Self.SetOptionValue(Self.GetStatOptionIndex(option), value as Int)
 	EndIf
 	
@@ -117,24 +117,12 @@ event OnOptionHighlight(int option)
 	ElseIf (option == _stageTimeControlId)
 		SetInfoText("Time it takes since your last feeding to advance to the next stage of zombie decay")
 	Else
-		int index = findOptionIndex(option);
+		int index = Self.GetStatOptionIndex(option);
 		if(index != -1)
-			SetInfoText("How much you " + Self.PlayerZombieQuest.getAVs()[index] + " will be modified while you are a stage " + (Self.getPageStage() + 1) + " Zombie.");
+			SetInfoText("How much your " + Self.PlayerZombieQuest.getAVs()[index] + "stat will be modified while you are a stage " + (Self.getPageStage()) + " Zombie.");
 		EndIf
 	EndIf
 EndEvent
-
-int Function findOptionIndex(int optionId)
-	int i = 0;
-	while(i < _controlIds.length)
-		if(_controlIds[i] == optionId)
-			return i;
-		EndIf
-		i += 1;
-	EndWhile
-	
-	return -1;
-EndFunction
 
 event OnPageReset(string page)
 	_zombifyPlayerControlId = -1
@@ -177,7 +165,7 @@ event OnPageReset(string page)
 		AddHeaderOption("Skill Modfiers")
 		int i = 3
 		While (i < AVs.length)
-			_controlIds[i] = AddSliderOption(AVs[i], PlayerZombieQuest.ZombieStage1Stats[i])
+			_controlIds[i] = AddSliderOption(AVs[i], values[i])
 			i += 1
 		EndWhile
 	EndIf

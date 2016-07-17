@@ -62,7 +62,7 @@ Function setStageStats(Int stage)
 	Else
 		stageValues = Self.ZombieStage3Stats
 	EndIf
-	int i = stageValues.length
+	int i = 0
 	string[] AVs = Self.getAVs()
 	While (i < stageValues.length)
 		Game.getPlayer().modActorValue(AVs[i], stageValues[i])
@@ -83,7 +83,7 @@ EndFunction
 
 Function clearStageStats()
 	If (lastChangeStats != None)
-		int i = Self.LastChangeStats.length
+		int i = 0
 		string[] AVs = Self.getAVs()
 		While (i < Self.LastChangeStats.length)
 			Game.getPlayer().modActorValue(AVs[i], 0 - lastChangeStats[i])

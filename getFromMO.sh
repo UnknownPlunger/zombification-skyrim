@@ -1,1 +1,1 @@
-cp E:/Program\ Files/Mod\ Organizer/overwrite/LetMeEatPeople.esp ./LetMeEatPeople.esp
+cp /E/SteamGames/steamapps/common/Skyrim/Data/LetMeEatPeople.esp ./LetMeEatPeople.esp
