@@ -94,14 +94,12 @@ Event OnUpdateGameTime()
 				
 		If (stageElapsedTime >= Self.ZombieDaysBetweenStages)
 			;AdvanceStage
-			Self.ZombieStageTime += Self.ZombieDaysBetweenStages
-		
-			If (Self.ZombieStage == 1)
+			If (Self.ZombieStage == 1 && stageElapsedTime < 2)
 				Self.ZombieStage = 2
 				Self.clearStageStats()
 				Self.setStageStats(2)
 				Self.ZombieStage2Message.show()
-			Elseif (Self.Zombiestage == 2)
+			Elseif (Self.Zombiestage == 2 || stageElapsedTime >= 2)
 				Self.ZombieStage = 3
 				Self.clearStageStats()
 				Self.setStageStats(3)
