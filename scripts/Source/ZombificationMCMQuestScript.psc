@@ -22,8 +22,8 @@ Event OnConfigInit()
 	Self.Pages = new string[4]
 	Self.Pages[0] = _homePageName
 	Self.Pages[1] = _stage1PageName
-	Self.Pages[2] = _stage1PageName
-	Self.Pages[3] = _stage1PageName
+	Self.Pages[2] = _stage2PageName
+	Self.Pages[3] = _stage3PageName
 EndEvent
 
 Event OnOptionSelect(int option)
@@ -147,7 +147,7 @@ event OnPageReset(string page)
 	
 	if (page == "" || page == _homePageName)
 		AddHeaderOption("Main Zombie Controls");
-		If (PlayerZombieQuest.isPlayerZombie())
+		If (!PlayerZombieQuest.isPlayerZombie())
 			_zombifyPlayerControlId = AddToggleOption("Become a Zombie", false)
 		Else
 			_curePlayerControlId = AddToggleOption("Cure yourself", false)

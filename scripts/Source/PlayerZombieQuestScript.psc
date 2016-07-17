@@ -49,6 +49,8 @@ String[] Function getAVs()
 	AVs[18] = "illusion"
 	AVs[19] = "restoration"
 	AVs[20] = "enchanting"
+	
+	return AVs
 EndFunction
 
 Function setStageStats(Int stage)
