@@ -12,13 +12,13 @@ Message Property ZombieStage3Message Auto
 
 Int Property ZombieStage Auto
 GlobalVariable Property GameDaysPassed Auto
-GlobalVariable Property ZombieDaysBetweenStages Auto
+Float Property ZombieDaysBetweenStages Auto
 Float Property ZombieStageTime Auto
 
-GlobalVariable Property ZombieHatred Auto
-GlobalVariable[] Property ZombieStage1Stats Auto
-GlobalVariable[] Property ZombieStage2Stats Auto
-GlobalVariable[] Property ZombieStage3Stats Auto
+Bool Property ZombieHatred Auto
+Int[] Property ZombieStage1Stats Auto
+Int[] Property ZombieStage2Stats Auto
+Int[] Property ZombieStage3Stats Auto
 
 Int[] Property LastChangeStats Auto
 
@@ -48,7 +48,7 @@ String[] Function getAVs()
 EndFunction
 
 Function setStageStats(Int stage)
-	GlobalVariable[] stageValues
+	Int[] stageValues
 	If (stage == 1)
 		stageValues = Self.ZombieStage1Stats
 	ElseIf (stage == 2)
@@ -59,18 +59,18 @@ Function setStageStats(Int stage)
 	int i = stageValues.length
 	string[] AVs = Self.getAVs()
 	While (i < stageValues.length)
-		Game.getPlayer().modActorValue(AVs[i], stageValues[i].getValueInt())
+		Game.getPlayer().modActorValue(AVs[i], stageValues[i])
 		i += 1
 	EndWhile
 	
 	Self.backupChangeValues(stageValues)
 EndFunction
 
-Function backupChangeValues(GlobalVariable[] stageValues)
+Function backupChangeValues(Int[] stageValues)
 	Self.LastChangeStats = new Int[21]
 	int i = 0
 	While (i < LastChangeStats.length)
-		LastChangeStats[i] = stageValues[i].getValueInt()
+		LastChangeStats[i] = stageValues[i]
 		i += 1
 	EndWhile
 EndFunction
@@ -92,9 +92,9 @@ Event OnUpdateGameTime()
 	If  (Game.IsMovementControlsEnabled() && Game.IsFightingControlsEnabled() && Game.GetPlayer().GetCombatState() == 0)
 		float stageElapsedTime = GameDaysPassed.Value - Self.ZombieStageTime
 				
-		If (stageElapsedTime >= Self.ZombieDaysBetweenStages.getValue())
+		If (stageElapsedTime >= Self.ZombieDaysBetweenStages)
 			;AdvanceStage
-			Self.ZombieStageTime += Self.ZombieDaysBetweenStages.getValue()
+			Self.ZombieStageTime += Self.ZombieDaysBetweenStages
 		
 			If (Self.ZombieStage == 1)
 				Self.ZombieStage = 2
@@ -106,7 +106,7 @@ Event OnUpdateGameTime()
 				Self.clearStageStats()
 				Self.setStageStats(3)
 				Self.ZombieStage3Message.show()
-				If (Self.ZombieHatred.getValueInt() == 1)
+				If (Self.ZombieHatred)
 					Game.getPlayer().SetAttackActorOnSight()
 				EndIf
 				Self.UnregisterForUpdateGameTime()

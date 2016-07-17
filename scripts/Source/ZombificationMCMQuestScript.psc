@@ -101,13 +101,13 @@ event OnPageReset(string page)
 		string[] AVs = PlayerZombieQuest.getAVs()
 		
 		AddHeaderOption("Attribute Modifiers")
-		_controlIds[0] = AddSliderOption(AVs[0], values[0].getValueInt())
-		_controlIds[1] = AddSliderOption(AVs[1], values[1].getValueInt())
-		_controlIds[2] = AddSliderOption(AVs[2], values[2].getValueInt())
+		_controlIds[0] = AddSliderOption(AVs[0], values[0])
+		_controlIds[1] = AddSliderOption(AVs[1], values[1])
+		_controlIds[2] = AddSliderOption(AVs[2], values[2])
 		AddHeaderOption("Skill Modfiers")
 		int i = 3
 		While (i < AVs.length)
-			_controlIds[i] = AddSliderOption(AVs[i], PlayerZombieQuest.ZombieStage1Stats[i].getValueInt())
+			_controlIds[i] = AddSliderOption(AVs[i], PlayerZombieQuest.ZombieStage1Stats[i])
 			i += 1
 		EndWhile
 	EndIf
