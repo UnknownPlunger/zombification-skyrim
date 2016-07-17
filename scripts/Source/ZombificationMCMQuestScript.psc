@@ -5,6 +5,7 @@ PlayerZombieQuestScript Property PlayerZombieQuest Auto
 bool checkboxState
 int _zombifyPlayerControlId
 int _curePlayerControlId
+int _stageTimeControlId
 int[] _controlIds
 
 Event OnConfigInit()
@@ -34,14 +35,67 @@ Event OnOptionSelect(int option)
 		Self.checkboxState = true
 		Self.PlayerZombieQuest.curePlayer()
 	EndIf
+	
+	SetToggleOptionValue(option, true)
 EndEvent
 
-Event OnOptionSliderOpen(int option)
+Int Function GetOptionCurrentValue(int index) 
+	if (Self.getPageNumber() == 0)
+		return Self.PlayerZombieQuest.ZombieStage1Stats[index]
+	ElseIf (Self.getPageNumber() == 1)
+		return Self.PlayerZombieQuest.ZombieStage2Stats[index]
+	ElseIf (Self.getPageNumber() == 2)
+		return Self.PlayerZombieQuest.ZombieStage3Stats[index]
+	EndIf
+EndFunction
 
+Function SetOptionValue(Int index, Int Value)
+	if (Self.getPageNumber() == 0)
+		Self.PlayerZombieQuest.ZombieStage1Stats[index] = Value
+	ElseIf (Self.getPageNumber() == 1)
+		Self.PlayerZombieQuest.ZombieStage2Stats[index] = Value
+	ElseIf (Self.getPageNumber() == 2)
+		Self.PlayerZombieQuest.ZombieStage3Stats[index] = Value
+	EndIf
+EndFunction
+
+Int Function GetStatOptionIndex(int option)
+	int i = 0
+	while (i < _controlIds.length) 
+		if (_controlIds[i] == option)
+			return _controlIds[i]
+		EndIf
+		i += 1
+	EndWhile
+	
+	return -1
+EndFunction
+
+Event OnOptionSliderOpen(int option)
+	If (option == _stageTimeControlId)
+		SetSliderDialogStartValue(PlayerZombieQuest.ZombieDaysBetweenStages * 24 as Int)
+		SetSliderDialogDefaultValue(24)
+		SetSliderDialogRange(3, 72)
+		SetSliderDialogInterval(3)
+	ElseIf
+		Int controlIndex = Self.GetStatOptionIndex(option)
+		If (controlIndex != -1)
+			SetSliderDialogStartValue(Self.GetOptionCurrentValue(index))
+			SetSliderDialogDefaultValue(0)
+			SetSliderDialogRange(-100, 100)
+			SetSliderDialogInterval(1)
+		EndIf
+	EndIf
 EndEvent
 
 Event OnOptionSliderAccept(int option, float value)
-
+	If (option == _stageTimeControlId)
+		Self.PlayerZombieQuest.ZombieDaysBetweenStages = value / 24.0
+	ElseIf
+		Self.SetOptionValue(Self.GetStatOptionIndex, value as Int)
+	EndIf
+	
+	SetSliderOptionValue(option, Value as Int)
 EndEvent
 
 event OnOptionHighlight(int option)
@@ -49,6 +103,8 @@ event OnOptionHighlight(int option)
 		SetInfoText("Become a zombie");
 	ElseIf (option == _curePlayerControlId)
 		SetInfoText("Cure yourself and become human again")
+	ElseIf (option == _stageTimeControlId)
+		SetInfoText("Time it takes since your last feeding to advance to the next stage of zombie decay")
 	Else
 		int index = findOptionIndex(option);
 		if(index != -1)
@@ -85,6 +141,9 @@ event OnPageReset(string page)
 		Else
 			_curePlayerControlId = AddToggleOption("Cure yourself", checkboxState)
 		EndIf
+		
+		AddEmptyOption()
+		_stageTimeControlId = AddSliderOption("Zombie Stage Timer")
 	else
 		GlobalVariable[] values
 		if (page == Self.Pages[0])
