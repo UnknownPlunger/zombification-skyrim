@@ -1,6 +1,7 @@
 ScriptName ZombificationMCMQuestScript extends SKI_ConfigBase
 
 PlayerZombieQuestScript Property PlayerZombieQuest Auto
+Perk Property ZombieFeedingPerk Auto
 
 bool checkboxState
 int _zombifyPlayerControlId
@@ -8,51 +9,51 @@ int _curePlayerControlId
 int _stageTimeControlId
 int[] _controlIds
 
-Event OnConfigInit()
-	Self.Pages = new string[3]
-	Self.Pages[0] = "Stage 1 Settings"
-	Self.Pages[1] = "Stage 2 Settings"
-	Self.Pages[2] = "Stage 3 Settings"
-EndEvent
+string _homePageName
+string _stage1PageName
+string _stage2PageName
+string _stage3PageName
 
-Int Function getPageNumber() 
-	int i = 0
-	while (i < Self.Pages.length)
-		If (Self.Pages[i] == Self.CurrentPage)
-			return i
-		EndIf
-		i += 1
-	EndWhile
-	
-	return -1
-EndFunction
+Event OnConfigInit()
+	_homePageName = "Home"
+	_stage1PageName = "Stage 1 Settings"
+	_stage2PageName = "Stage 2 Settings"
+	_stage3PageName = "Stage 3 Settings"
+	Self.Pages = new string[4]
+	Self.Pages[0] = _homePageName
+	Self.Pages[1] = _stage1PageName
+	Self.Pages[2] = _stage1PageName
+	Self.Pages[3] = _stage1PageName
+EndEvent
 
 Event OnOptionSelect(int option)
 	If (option == _zombifyPlayerControlId)
 		Self.PlayerZombieQuest.zombifyPlayer()
+		Game.getPlayer().AddPerk(Self.ZombieFeedingPerk)
 	ElseIf (option == _curePlayerControlId)
 		Self.PlayerZombieQuest.curePlayer()
+		Game.getPlayer().RemovePerk(Self.ZombieFeedingPerk)
 	EndIf
 	
 	SetToggleOptionValue(option, true)
 EndEvent
 
 Int Function GetOptionCurrentValue(int index) 
-	if (Self.getPageNumber() == 0)
+	if (Self.CurrentPage == _stage1PageName)
 		return Self.PlayerZombieQuest.ZombieStage1Stats[index]
-	ElseIf (Self.getPageNumber() == 1)
+	ElseIf (Self.CurrentPage == _stage2PageName)
 		return Self.PlayerZombieQuest.ZombieStage2Stats[index]
-	ElseIf (Self.getPageNumber() == 2)
+	ElseIf (Self.CurrentPage == _stage3PageName)
 		return Self.PlayerZombieQuest.ZombieStage3Stats[index]
 	EndIf
 EndFunction
 
 Function SetOptionValue(Int index, Int Value)
-	if (Self.getPageNumber() == 0)
+	if (Self.CurrentPage == _stage1PageName)
 		Self.PlayerZombieQuest.ZombieStage1Stats[index] = Value
-	ElseIf (Self.getPageNumber() == 1)
+	ElseIf (Self.CurrentPage == _stage2PageName)
 		Self.PlayerZombieQuest.ZombieStage2Stats[index] = Value
-	ElseIf (Self.getPageNumber() == 2)
+	ElseIf (Self.CurrentPage == _stage3PageName)
 		Self.PlayerZombieQuest.ZombieStage3Stats[index] = Value
 	EndIf
 EndFunction
@@ -96,6 +97,18 @@ Event OnOptionSliderAccept(int option, float value)
 	SetSliderOptionValue(option, Value as Int)
 EndEvent
 
+Int Function getPageStage() 
+	if (Self.CurrentPage == _stage1PageName)
+		return 1
+	ElseIf (Self.CurrentPage == _stage2PageName)
+		return 2
+	ElseIf (Self.CurrentPage == _stage3PageName)
+		return 3
+	EndIf
+	
+	return -1
+EndFunction
+
 event OnOptionHighlight(int option)
 	if(option == _zombifyPlayerControlId)
 		SetInfoText("Become a zombie");
@@ -106,7 +119,7 @@ event OnOptionHighlight(int option)
 	Else
 		int index = findOptionIndex(option);
 		if(index != -1)
-			SetInfoText("How much you " + Self.PlayerZombieQuest.getAVs()[index] + " will be modified while you are a stage " + (Self.getPageNumber() + 1) + " Zombie.");
+			SetInfoText("How much you " + Self.PlayerZombieQuest.getAVs()[index] + " will be modified while you are a stage " + (Self.getPageStage() + 1) + " Zombie.");
 		EndIf
 	EndIf
 EndEvent
@@ -126,12 +139,13 @@ EndFunction
 event OnPageReset(string page)
 	_zombifyPlayerControlId = -1
 	_curePlayerControlId = -1
+	_stageTimeControlId = -1
 	_controlIds = new int[21]
 
-	SetCursorFillMode(TOP_TO_BOTTOM);
-	SetCursorPosition(1)
+	SetCursorPosition(0)
+	SetCursorFillMode(TOP_TO_BOTTOM)
 	
-	if (page == "")
+	if (page == "" || page == _homePageName)
 		AddHeaderOption("Main Zombie Controls");
 		If (PlayerZombieQuest.isPlayerZombie())
 			_zombifyPlayerControlId = AddToggleOption("Become a Zombie", false)
@@ -143,13 +157,13 @@ event OnPageReset(string page)
 		_stageTimeControlId = AddSliderOption("Zombie Stage Timer", (Self.PlayerZombieQuest.ZombieDaysBetweenStages * 24) as Int)
 	else
 		int[] values
-		if (page == Self.Pages[0])
+		if (page == _stage1PageName)
 			values = PlayerZombieQuest.ZombieStage1Stats
 			AddHeaderOption("Zombie Stage 1 Settings")
-		ElseIf (page == Self.Pages[1])
+		ElseIf (page == _stage2PageName)
 			values = PlayerZombieQuest.ZombieStage2Stats
 			AddHeaderOption("Zombie Stage 2 Settings")
-		ElseIf (page == Self.Pages[2])
+		ElseIf (page == _stage3PageName)
 			values = PlayerZombieQuest.ZombieStage3Stats
 			AddHeaderOption("Zombie Stage 3 Settings")
 		EndIf

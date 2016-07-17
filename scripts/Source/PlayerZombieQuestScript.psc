@@ -10,6 +10,10 @@ Message Property ZombieStage1Message Auto
 Message Property ZombieStage2Message Auto
 Message Property ZombieStage3Message Auto
 
+Spell Property ZombieStage1Ability Auto
+Spell Property ZombieStage2Ability Auto
+Spell Property ZombieStage3Ability Auto
+
 Int Property ZombieStage Auto
 GlobalVariable Property GameDaysPassed Auto
 Float Property ZombieDaysBetweenStages Auto
@@ -98,11 +102,17 @@ Event OnUpdateGameTime()
 				Self.ZombieStage = 2
 				Self.clearStageStats()
 				Self.setStageStats(2)
+				game.GetPlayer().RemoveSpell(Self.ZombieStage1Ability)
+				game.GetPlayer().AddSpell(Self.ZombieStage2Ability)
+				game.GetPlayer().RemoveSpell(Self.ZombieStage3Ability)
 				Self.ZombieStage2Message.show()
 			Elseif (Self.Zombiestage == 2 || stageElapsedTime >= 2)
 				Self.ZombieStage = 3
 				Self.clearStageStats()
 				Self.setStageStats(3)
+				game.GetPlayer().RemoveSpell(Self.ZombieStage1Ability)
+				game.GetPlayer().RemoveSpell(Self.ZombieStage2Ability)
+				game.GetPlayer().AddSpell(Self.ZombieStage3Ability)
 				Self.ZombieStage3Message.show()
 				If (Self.ZombieHatred)
 					Game.getPlayer().SetAttackActorOnSight()
@@ -121,18 +131,24 @@ Function feed()
 		Self.ZombieStage = 1
 		Self.clearStageStats()
 		Self.setStageStats(1)
+		game.GetPlayer().AddSpell(Self.ZombieStage1Ability)
+		game.GetPlayer().RemoveSpell(Self.ZombieStage2Ability)
+		game.GetPlayer().RemoveSpell(Self.ZombieStage3Ability)
 		Self.ZombieFeedMessageStage1.show()
 		Self.ZombieStage1Message.show()
 	ElseIf (Self.ZombieStage == 3)
 		Self.ZombieStage = 2
 		Self.clearStageStats()
 		Self.setStageStats(2)
-		Self.ZombieFeedMessageStage3.show()
-		Self.ZombieStage2Message.show()
+		game.GetPlayer().RemoveSpell(Self.ZombieStage1Ability)
+		game.GetPlayer().AddSpell(Self.ZombieStage2Ability)
+		game.GetPlayer().RemoveSpell(Self.ZombieStage3Ability)
 		Game.getPlayer().SetAttackActorOnSight(false)
-
 		Self.UnregisterForUpdateGameTime()
 		Self.RegisterForUpdateGameTime(3)
+		
+		Self.ZombieFeedMessageStage3.show()
+		Self.ZombieStage2Message.show()
 	EndIf
 EndFunction
 
