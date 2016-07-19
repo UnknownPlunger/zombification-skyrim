@@ -7,6 +7,7 @@ bool checkboxState
 int _zombifyPlayerControlId
 int _curePlayerControlId
 int _stageTimeControlId
+int _hateControlId
 int[] _controlIds
 
 string _homePageName
@@ -30,12 +31,17 @@ Event OnOptionSelect(int option)
 	If (option == _zombifyPlayerControlId)
 		Self.PlayerZombieQuest.zombifyPlayer()
 		Game.getPlayer().AddPerk(Self.ZombieFeedingPerk)
+		SetToggleOptionValue(option, true)
 	ElseIf (option == _curePlayerControlId)
 		Self.PlayerZombieQuest.curePlayer()
 		Game.getPlayer().RemovePerk(Self.ZombieFeedingPerk)
+		SetToggleOptionValue(option, true)
+	ElseIf (option == _hateControlId)
+		Self.PlayerZombieQuest.ZombieHatred = !Self.PlayerZombieQuest.ZombieHatred
+		SetToggleOptionValue(option, Self.PlayerZombieQuest.ZombieHatred)
 	EndIf
 	
-	SetToggleOptionValue(option, true)
+	
 EndEvent
 
 Int Function GetOptionCurrentValue(int index) 
@@ -116,6 +122,8 @@ event OnOptionHighlight(int option)
 		SetInfoText("Cure yourself and become human again")
 	ElseIf (option == _stageTimeControlId)
 		SetInfoText("Time it takes since your last feeding to advance to the next stage of zombie decay")
+	ElseIF (option == _hateControlId)
+		SetInfoText("If you should be attacked by everybody when you are a stage 3 zombie")
 	Else
 		int index = Self.GetStatOptionIndex(option);
 		if(index != -1)
@@ -143,17 +151,15 @@ event OnPageReset(string page)
 		
 		AddEmptyOption()
 		_stageTimeControlId = AddSliderOption("Zombie Stage Timer", (Self.PlayerZombieQuest.ZombieDaysBetweenStages * 24) as Int)
+		_hateControlId = AddToggleOption("Stage 3 hatred", Self.PlayerZombieQuest.ZombieHatred)
 	else
 		int[] values
 		if (page == _stage1PageName)
 			values = PlayerZombieQuest.ZombieStage1Stats
-			AddHeaderOption("Zombie Stage 1 Settings")
 		ElseIf (page == _stage2PageName)
 			values = PlayerZombieQuest.ZombieStage2Stats
-			AddHeaderOption("Zombie Stage 2 Settings")
 		ElseIf (page == _stage3PageName)
 			values = PlayerZombieQuest.ZombieStage3Stats
-			AddHeaderOption("Zombie Stage 3 Settings")
 		EndIf
 		
 		string[] AVs = PlayerZombieQuest.getAVs()
