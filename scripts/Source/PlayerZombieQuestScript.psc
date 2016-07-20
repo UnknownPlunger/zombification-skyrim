@@ -20,14 +20,14 @@ Float Property ZombieDaysBetweenStages Auto
 Float Property ZombieStageTime Auto
 
 Bool Property ZombieHatred Auto
-Int[] Property ZombieStage1Stats Auto
-Int[] Property ZombieStage2Stats Auto
-Int[] Property ZombieStage3Stats Auto
+Float[] Property ZombieStage1Stats Auto
+Float[] Property ZombieStage2Stats Auto
+Float[] Property ZombieStage3Stats Auto
 
-Int[] Property LastChangeStats Auto
+Float[] Property LastChangeStats Auto
 
 String[] Function getAVs()
-	string[] AVs = new string[21]
+	string[] AVs = new string[31]
 	AVs[0] = "health"
 	AVs[1] = "magicka"
 	AVs[2] = "stamina"
@@ -49,12 +49,21 @@ String[] Function getAVs()
 	AVs[18] = "illusion"
 	AVs[19] = "restoration"
 	AVs[20] = "enchanting"
-	
+	AVs[21] = "DamageResist"
+	AVs[22] = "DiseaseResist"
+	AVs[23] = "PoisonResist"
+	AVs[24] = "MagicResist"
+	AVs[25] = "FireResist"
+	AVs[26] = "FrostResist"
+	AVs[27] = "ElectricResist"
+	AVs[28] = "UnarmedDamage"
+	AVs[29] = "AttackDamageMult"
+	AVs[30] = "speedmult"
 	return AVs
 EndFunction
 
 Function setStageStats(Int stage)
-	Int[] stageValues
+	Float[] stageValues
 	If (stage == 1)
 		stageValues = Self.ZombieStage1Stats
 	ElseIf (stage == 2)
@@ -72,8 +81,8 @@ Function setStageStats(Int stage)
 	Self.backupChangeValues(stageValues)
 EndFunction
 
-Function backupChangeValues(Int[] stageValues)
-	Self.LastChangeStats = new Int[21]
+Function backupChangeValues(Float[] stageValues)
+	Self.LastChangeStats = new Float[31]
 	int i = 0
 	While (i < LastChangeStats.length)
 		LastChangeStats[i] = stageValues[i]
@@ -160,6 +169,7 @@ Function zombifyPlayer()
 		Self.ZombieStage = 1
 		Self.ZombieStageTime = Self.GameDaysPassed.getValue()
 		Self.setStageStats(1)
+		game.GetPlayer().AddSpell(Self.ZombieStage1Ability)
 		Self.RegisterForUpdateGameTime(3)
 		Self.ZombieRisen.Show()
 	EndIf
@@ -169,6 +179,10 @@ Function curePlayer()
 	If(PlayerIsZombie)
 		Self.ClearStageStats()
 		Game.getPlayer().SetAttackActorOnSight(false)
+		game.GetPlayer().RemoveSpell(Self.ZombieStage1Ability)
+		game.GetPlayer().RemoveSpell(Self.ZombieStage2Ability)
+		game.GetPlayer().RemoveSpell(Self.ZombieStage3Ability)
+		Self.PlayerIsZombie = false
 		Self.UnregisterForUpdateGameTime()
 		Self.ZombieCured.show()
 	EndIf
