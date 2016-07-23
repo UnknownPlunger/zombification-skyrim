@@ -24,7 +24,13 @@ Float[] Property ZombieStage1Stats Auto
 Float[] Property ZombieStage2Stats Auto
 Float[] Property ZombieStage3Stats Auto
 
+Float Property ZombieFeedBonus Auto
+Int Property TimesFed Auto
+
 Float[] Property LastChangeStats Auto
+GlobalVariable Property ZombieIsProcessing Auto
+
+bool updateGuard = false
 
 String[] Function getAVs()
 	string[] AVs = new string[31]
@@ -62,6 +68,10 @@ String[] Function getAVs()
 	return AVs
 EndFunction
 
+float function calculateModValue(float startValue)
+	return (startValue * ((Self.TimesFed * ZombieFeedBonus) + 1))
+EndFunction
+
 Function setStageStats(Int stage)
 	Float[] stageValues
 	If (stage == 1)
@@ -74,7 +84,8 @@ Function setStageStats(Int stage)
 	int i = 0
 	string[] AVs = Self.getAVs()
 	While (i < stageValues.length)
-		Game.getPlayer().modActorValue(AVs[i], stageValues[i])
+		Game.getPlayer().modActorValue(AVs[i], self.calculateModValue(stageValues[i]))
+		Debug.trace("zombie applying: " + self.calculateModValue(stageValues[i]))
 		i += 1
 	EndWhile
 	
@@ -82,31 +93,34 @@ Function setStageStats(Int stage)
 EndFunction
 
 Function backupChangeValues(Float[] stageValues)
-	Self.LastChangeStats = new Float[31]
 	int i = 0
 	While (i < LastChangeStats.length)
-		LastChangeStats[i] = stageValues[i]
+		LastChangeStats[i] = self.calculateModValue(stageValues[i])
 		i += 1
 	EndWhile
 EndFunction
 
 Function clearStageStats()
-	If (lastChangeStats != None)
-		int i = 0
-		string[] AVs = Self.getAVs()
-		While (i < Self.LastChangeStats.length)
-			Game.getPlayer().modActorValue(AVs[i], 0 - lastChangeStats[i])
-			i += 1
-		EndWhile
-		
-		lastChangeStats = None
-	EndIf
+	int i = 0
+	string[] AVs = Self.getAVs()
+	While (i < Self.LastChangeStats.length)
+		Debug.Trace("zombie clearing: " + lastChangeStats[i])
+		Game.getPlayer().modActorValue(AVs[i], 0 - lastChangeStats[i])
+		lastChangeStats[i] = 0
+		i += 1
+	EndWhile
 EndFunction
 
 Event OnUpdateGameTime()
+	If (Self.ZombieIsProcessing.getValueInt() == 1)
+		return
+	EndIF
+	Self.ZombieIsProcessing.setValueInt(1)
+
 	If  (Game.IsMovementControlsEnabled() && Game.IsFightingControlsEnabled() && Game.GetPlayer().GetCombatState() == 0)
 		float stageElapsedTime = GameDaysPassed.Value - Self.ZombieStageTime
 				
+		
 		If (stageElapsedTime >= Self.ZombieDaysBetweenStages)
 			;AdvanceStage
 			If (Self.ZombieStage == 1 && stageElapsedTime < 2)
@@ -132,15 +146,19 @@ Event OnUpdateGameTime()
 			EndIf
 		EndIf
 	EndIf
+	
+	Self.ZombieIsProcessing.setValueInt(0)
 EndEvent
 
 Function feed()
+	Self.TimesFed += 1
+	Self.clearStageStats()
 	Self.ZombieStageTime = Self.GameDaysPassed.getValue()
 	If (Self.ZombieStage == 1)
 		Self.ZombieFeedMessageStage1.show()
+		Self.setStageStats(1)
 	Elseif (Self.Zombiestage == 2)
 		Self.ZombieStage = 1
-		Self.clearStageStats()
 		Self.setStageStats(1)
 		game.GetPlayer().AddSpell(Self.ZombieStage1Ability)
 		game.GetPlayer().RemoveSpell(Self.ZombieStage2Ability)
@@ -149,7 +167,6 @@ Function feed()
 		Self.ZombieStage1Message.show()
 	ElseIf (Self.ZombieStage == 3)
 		Self.ZombieStage = 2
-		Self.clearStageStats()
 		Self.setStageStats(2)
 		game.GetPlayer().RemoveSpell(Self.ZombieStage1Ability)
 		game.GetPlayer().AddSpell(Self.ZombieStage2Ability)
@@ -161,6 +178,8 @@ Function feed()
 		Self.ZombieFeedMessageStage3.show()
 		Self.ZombieStage2Message.show()
 	EndIf
+	
+	
 EndFunction
 
 Function zombifyPlayer() 

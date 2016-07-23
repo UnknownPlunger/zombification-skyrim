@@ -6,9 +6,11 @@ Perk Property ZombieFeedingPerk Auto
 bool checkboxState
 int _zombifyPlayerControlId
 int _curePlayerControlId
+int _zombieFeedBonusControlId
 int _stageTimeControlId
 int _hateControlId
 int[] _controlIds
+int _timesFedId
 
 string _homePageName
 string _stage1PageName
@@ -82,6 +84,11 @@ Event OnOptionSliderOpen(int option)
 		SetSliderDialogDefaultValue(24)
 		SetSliderDialogRange(3, 72)
 		SetSliderDialogInterval(3)
+	ElseIf (option == _zombieFeedBonusControlId)
+		SetSliderDialogStartValue(PlayerZombieQuest.ZombieFeedBonus * 100)
+		SetSliderDialogDefaultValue(0.02)
+		SetSliderDialogRange(0, 1.0)
+		SetSliderDialogInterval(0.005)
 	Else
 		Int controlIndex = Self.GetStatOptionIndex(option)
 		If (controlIndex != -1)
@@ -114,6 +121,9 @@ Event OnOptionSliderAccept(int option, float value)
 	If (option == _stageTimeControlId)
 		Self.PlayerZombieQuest.ZombieDaysBetweenStages = value / 24.0
 		SetSliderOptionValue(option, Value, "{0} Hours")
+	ElseIf (option == _zombieFeedBonusControlId)
+		Self.PlayerZombieQuest.ZombieFeedBonus = (value / 100.0)
+		SetSliderOptionValue(option, value, "{3}%")
 	Else		
 		int index = Self.GetStatOptionIndex(option)
 		Self.SetOptionValue(index, value)
@@ -146,8 +156,12 @@ event OnOptionHighlight(int option)
 		SetInfoText("Cure yourself and become human again")
 	ElseIf (option == _stageTimeControlId)
 		SetInfoText("Time it takes since your last feeding to advance to the next stage of zombie decay")
+	ElseIf (option == _zombieFeedBonusControlId)
+		SetInfoText("The degree to which buffs and debuffs will be increased for each time you have fed")
 	ElseIF (option == _hateControlId)
 		SetInfoText("If you should be attacked by everybody when you are a stage 3 zombie")
+	ElseIF (option == _timesFedId)
+		SetInfoText("Number of times you have tasted the flesh of the living")
 	Else
 		int index = Self.GetStatOptionIndex(option);
 		if(index != -1)
@@ -195,7 +209,9 @@ EndFunction
 event OnPageReset(string page)
 	_zombifyPlayerControlId = -1
 	_curePlayerControlId = -1
+	_zombieFeedBonusControlId = -1
 	_stageTimeControlId = -1
+	_timesFedId = -1
 	_controlIds = new int[31]
 
 	SetCursorPosition(0)
@@ -211,7 +227,11 @@ event OnPageReset(string page)
 		
 		AddEmptyOption()
 		_stageTimeControlId = AddSliderOption("Zombie Stage Timer", (Self.PlayerZombieQuest.ZombieDaysBetweenStages * 24) as Int, "{0} Hours")
+		_zombieFeedBonusControlId = AddSliderOption("Zombie Growth", Self.PlayerZombieQuest.ZombieFeedBonus * 100, "{3}%")
 		_hateControlId = AddToggleOption("Stage 3 hatred", Self.PlayerZombieQuest.ZombieHatred)
+		
+		SetCursorPosition(1)
+		_timesFedId = AddTextOption("Times Fed", Self.PlayerZombieQuest.TimesFed as string)
 	else
 		float[] values
 		if (page == _stage1PageName)

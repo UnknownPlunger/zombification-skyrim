@@ -1,14 +1,14 @@
 ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
-;NEXT FRAGMENT INDEX 22
+;NEXT FRAGMENT INDEX 26
 Scriptname PRKF_ZombieFeedingPerk_020022EC Extends Perk Hidden
 
 ;BEGIN FRAGMENT Fragment_0
 Function Fragment_0(ObjectReference akTargetRef, Actor akActor)
 ;BEGIN CODE
+Self.ZombieIsProcessing.SetValueInt(1)
 Game.GetPlayer().StartCannibal(akTargetRef as Actor)
 PlayerZombieQuest.feed();
-_akTargetRef = akTargetref
-RegisterForSingleUpdate(2)
+Self.ZombieIsProcessing.SetValueInt(0)
 ;END CODE
 EndFunction
 ;END FRAGMENT
@@ -16,16 +16,4 @@ EndFunction
 ;END FRAGMENT CODE - Do not edit anything between this and the begin comment
 
 PlayerZombieQuestScript Property PlayerZombieQuest  Auto  
-
-ActorBase Property TreasCorpseSkeleton Auto
-
-ObjectReference _akTargetRef
-
-Event OnUpdate()
-	ObjectReference skele = (_akTargetRef.PlaceAtMe(self.TreasCorpseSkeleton, 1))
-	skele.MoveTo(_akTargetRef)
-	(skele as Actor).kill()
-	skele.removeAllItems()
-	_akTargetRef.removeAllItems(skele, true, true)
-	_akTargetRef.Disable(true)
-EndEvent
+GlobalVariable Property ZombieIsProcessing Auto
