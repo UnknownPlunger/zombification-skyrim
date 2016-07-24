@@ -30,6 +30,8 @@ Int Property TimesFed Auto
 Float[] Property LastChangeStats Auto
 GlobalVariable Property ZombieIsProcessing Auto
 
+Int Property StatGrowthMode Auto
+
 bool updateGuard = false
 
 String[] Function getAVs()
@@ -69,7 +71,23 @@ String[] Function getAVs()
 EndFunction
 
 float function calculateModValue(float startValue)
-	return (startValue * ((Self.TimesFed * ZombieFeedBonus) + 1))
+	If (Self.StatGrowthMode == 0)
+		return (startValue * ((Self.TimesFed * ZombieFeedBonus) + 1))
+	ElseIf (Self.StatGrowthMode == 1)
+		If (startValue < 0)
+			return (startValue * (1 - (Self.TimesFed * ZombieFeedBonus)))
+		Else
+			return (startValue * ((Self.TimesFed * ZombieFeedBonus) + 1))
+		EndIf
+	ElseIf (Self.StatGrowthMode == 2)
+		If (startValue > 0)
+			return (startValue * ((Self.TimesFed * ZombieFeedBonus) + 1))
+		Else
+			return startValue
+		EndIf
+	Else
+		return startValue
+	EndIf
 EndFunction
 
 Function setStageStats(Int stage)
@@ -85,7 +103,6 @@ Function setStageStats(Int stage)
 	string[] AVs = Self.getAVs()
 	While (i < stageValues.length)
 		Game.getPlayer().modActorValue(AVs[i], self.calculateModValue(stageValues[i]))
-		Debug.trace("zombie applying: " + self.calculateModValue(stageValues[i]))
 		i += 1
 	EndWhile
 	
@@ -103,8 +120,7 @@ EndFunction
 Function clearStageStats()
 	int i = 0
 	string[] AVs = Self.getAVs()
-	While (i < Self.LastChangeStats.length)
-		Debug.Trace("zombie clearing: " + lastChangeStats[i])
+	While (i < Self.LastChangeStats.length)	
 		Game.getPlayer().modActorValue(AVs[i], 0 - lastChangeStats[i])
 		lastChangeStats[i] = 0
 		i += 1

@@ -7,6 +7,7 @@ bool checkboxState
 int _zombifyPlayerControlId
 int _curePlayerControlId
 int _zombieFeedBonusControlId
+int _zombieFeedBonusTypeId
 int _stageTimeControlId
 int _hateControlId
 int[] _controlIds
@@ -31,10 +32,12 @@ EndEvent
 
 Event OnOptionSelect(int option)
 	If (option == _zombifyPlayerControlId)
+		SetOptionFlags(option, OPTION_FLAG_DISABLED)
 		Self.PlayerZombieQuest.zombifyPlayer()
 		Game.getPlayer().AddPerk(Self.ZombieFeedingPerk)
 		SetToggleOptionValue(option, true)
 	ElseIf (option == _curePlayerControlId)
+		SetOptionFlags(option, OPTION_FLAG_DISABLED)
 		Self.PlayerZombieQuest.curePlayer()
 		Game.getPlayer().RemovePerk(Self.ZombieFeedingPerk)
 		SetToggleOptionValue(option, true)
@@ -137,6 +140,17 @@ Event OnOptionSliderAccept(int option, float value)
 	
 EndEvent
 
+Event OnOptionMenuOpen(int option)
+	SetMenuDialogOptions(self.getStatGrowthModes())
+	SetMenuDialogDefaultIndex(0)
+	SetMenuDialogStartIndex(Self.PlayerZombieQuest.StatGrowthMode)
+EndEvent
+
+Event OnOptionMenuAccept(int option, int index)
+	Self.PlayerZombieQuest.StatGrowthMode = index
+	SetMenuOptionValue(option, self.getStatGrowthModes()[index])
+EndEvent
+
 Int Function getPageStage() 
 	if (Self.CurrentPage == _stage1PageName)
 		return 1
@@ -158,10 +172,12 @@ event OnOptionHighlight(int option)
 		SetInfoText("Time it takes since your last feeding to advance to the next stage of zombie decay")
 	ElseIf (option == _zombieFeedBonusControlId)
 		SetInfoText("The degree to which buffs and debuffs will be increased for each time you have fed")
-	ElseIF (option == _hateControlId)
+	ElseIf (option == _hateControlId)
 		SetInfoText("If you should be attacked by everybody when you are a stage 3 zombie")
-	ElseIF (option == _timesFedId)
+	ElseIf (option == _timesFedId)
 		SetInfoText("Number of times you have tasted the flesh of the living")
+	ElseIf (option == _zombieFeedBonusTypeId)
+		SetInfoText("The way the Zombie Growth is applied.\nAmplify: Buffs are improved but debuffs are more severe.\nImprove: Buffs are improved while debuffs are slowly eliminated.\nDebuffs Unchanged: Buffs are improved while debuffs are left unchanged.\nNo Growth: Feeding does not effect buffs and debuffs.")
 	Else
 		int index = Self.GetStatOptionIndex(option);
 		if(index != -1)
@@ -206,10 +222,20 @@ String[] Function getAVLabels()
 	return AVs
 EndFunction
 
+String[] Function getStatGrowthModes()
+	string[] modes = new String[4]
+	modes[0] = "Amplify"
+	modes[1] = "Improve"
+	modes[2] = "Debuffs Unchanged"
+	modes[3] = "No Growth"
+	return modes
+EndFunction
+
 event OnPageReset(string page)
 	_zombifyPlayerControlId = -1
 	_curePlayerControlId = -1
 	_zombieFeedBonusControlId = -1
+	_zombieFeedBonusTypeId = -1
 	_stageTimeControlId = -1
 	_timesFedId = -1
 	_controlIds = new int[31]
@@ -228,6 +254,7 @@ event OnPageReset(string page)
 		AddEmptyOption()
 		_stageTimeControlId = AddSliderOption("Zombie Stage Timer", (Self.PlayerZombieQuest.ZombieDaysBetweenStages * 24) as Int, "{0} Hours")
 		_zombieFeedBonusControlId = AddSliderOption("Zombie Growth", Self.PlayerZombieQuest.ZombieFeedBonus * 100, "{3}%")
+		_zombieFeedBonusTypeId = AddMenuOption("Growth Type", Self.getStatGrowthModes()[Self.PlayerZombieQuest.StatGrowthMode])
 		_hateControlId = AddToggleOption("Stage 3 hatred", Self.PlayerZombieQuest.ZombieHatred)
 		
 		SetCursorPosition(1)
